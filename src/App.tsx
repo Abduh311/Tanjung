@@ -3679,7 +3679,7 @@ export default function App() {
                     type="button"
                     onClick={() => setIsAppShareModalOpen(true)}
                     className="flex-1 inline-flex items-center justify-center gap-1 h-full px-1.5 text-[11px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded transition-colors cursor-pointer whitespace-nowrap leading-none"
-                    title="Buat & Salin Link Aplikasi & Link Report Vercel"
+                    title="Buat & Salin Link Aplikasi & Link Report"
                   >
                     <Share2 className="w-3 h-3 shrink-0" />
                     <span>Link</span>

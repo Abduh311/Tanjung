@@ -49,11 +49,25 @@ export function getPublicShareableOrigin(customOriginOverride?: string): string 
 }
 
 /**
- * Returns the shareable base URL with trailing slash.
+ * Returns the shareable base URL with trailing slash (including GitHub Pages subpath if applicable).
  */
 export function getPublicShareableBaseUrl(customOriginOverride?: string): string {
   const origin = getPublicShareableOrigin(customOriginOverride);
-  return `${origin}/`;
+  if (customOriginOverride && customOriginOverride.trim()) {
+    try {
+      const parsed = new URL(origin);
+      if (parsed.pathname && parsed.pathname !== '/') {
+        return `${origin}/`;
+      }
+    } catch {}
+  }
+  const rawBase =
+    (typeof import.meta !== 'undefined' &&
+      (import.meta as { env?: Record<string, string | undefined> }).env?.BASE_URL) ||
+    '/';
+  const normalizedBase = rawBase.startsWith('/') ? rawBase : `/${rawBase}`;
+  const cleanBase = normalizedBase.endsWith('/') ? normalizedBase : `${normalizedBase}/`;
+  return `${origin}${cleanBase}`;
 }
 
 /**
