@@ -12,14 +12,17 @@ export default function handler(req: IncomingMessage, res: ServerResponse) {
     return;
   }
 
-  const publicTunnelUrl = (
+  const rawUrl = (
     process.env.PUBLIC_TUNNEL_URL ||
-    process.env.APP_URL ||
     process.env.VITE_APP_URL ||
+    (process.env.VERCEL ? '' : process.env.APP_URL) ||
     ''
   )
     .trim()
     .replace(/\/+$/, '');
+  const publicTunnelUrl = rawUrl.includes('ais-dev-')
+    ? rawUrl.replace('ais-dev-', 'ais-pre-')
+    : rawUrl;
 
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
