@@ -1618,10 +1618,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                   setIsScreenshotModalOpen(true);
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-slate-800 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-                title="Buka Studio Screenshot (1:1 Harian / 3:4 Weekly & Bulanan)"
+                title="Buka Studio Screenshot Rasio 3:4 (Harian, Weekly & Bulanan)"
               >
                 <Camera className="w-3.5 h-3.5 text-slate-600 shrink-0" />
-                <span>{horizon === 'harian' ? 'Screenshot 1:1' : 'Screenshot 3:4'}</span>
+                <span>Screenshot 3:4</span>
               </button>
 
               {onOpenExportModal && (

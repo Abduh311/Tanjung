@@ -560,7 +560,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
     };
   }, [cvInventoryOps, cvLiveQtyMap, mode, monthKey, weekNumber]);
 
-  const isPortrait3x4 = mode === 'weekly' || mode === 'bulanan';
+  const isPortrait3x4 = true;
 
   const projectStream = (src: {
     dpSales: number;
@@ -637,7 +637,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       : `${MONTH_NAMES_ID[monthKey] || 'November'} 2026`;
 
   // =========================================================================
-  // CANVAS RENDER ENGINE (1:1 Harian · 3:4 Weekly · 3:4 Bulanan)
+  // CANVAS RENDER ENGINE (3:4 Harian · 3:4 Weekly · 3:4 Bulanan)
   // =========================================================================
   useEffect(() => {
     if (!isOpen) return;
@@ -1304,7 +1304,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       };
 
       // =====================================================================
-      // LAYOUT 1: HARIAN 1:1 (1400 × 1400 px)
+      // LAYOUT 1: HARIAN 3:4 (1350 × 1800 px)
       // =====================================================================
       if (mode === 'harian') {
         const curr = projectStream(activeDayObj);
@@ -1315,7 +1315,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
         const conv =
           curr.trafficTotal > 0 ? (curr.trx / curr.trafficTotal) * 100 : 0;
 
-        draw4KpiStrip(192, 118, [
+        draw4KpiStrip(184, 118, [
           {
             label: `Sales Harian (${streamBadge})`,
             value: `Rp ${formatNumberId(curr.sales) || '0'}`,
@@ -1345,6 +1345,9 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
           },
         ]);
 
+        // 4-Pillar Comparison Row: Report DP | Report CV | Brand | Total DP+CV
+        draw4PillarBreakdown(316, 116, activeDayObj);
+
         // Stacked Daily Bar Chart (7 Days of W)
         const totA = activeWeekObj.days.reduce(
           (s, d) => s + projectStream(d).primaryA,
@@ -1356,9 +1359,9 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
         );
         drawStackedDiagram(
           44,
-          326,
+          446,
           W - 88,
-          340,
+          370,
           `TREN PENJUALAN HARIAN W${activeWeekObj.weekNumber} (${curr.labelA.toUpperCase()} vs ${curr.labelB.toUpperCase()})`,
           curr.labelA,
           curr.labelB,
@@ -1380,103 +1383,165 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
           })
         );
 
-        // 4-Pillar Comparison Row: Report DP | Report CV | Brand | Total DP+CV
-        draw4PillarBreakdown(682, 128, activeDayObj);
-
         // Data Brand Harian Panel (NO Pagi/Siang split)
         drawBrandPanel(
           44,
-          826,
+          830,
           W - 88,
-          224,
+          232,
           `DATA BRAND DIVISI 1 — HARIAN (${activeDayObj.tanggal})`,
           activeDayObj
         );
 
-        // Mini 7-Day Table + Reason Footer (all 4 pillars per row)
-        const tblY = 1066;
-        const tblH = 282;
+        // 7-Day Table (all 4 pillars per row, tuned for W = 1350)
+        const tblY = 1076;
+        const tblH = 440;
         roundRect(44, tblY, W - 88, tblH, 14, cardBg, cardBorder, 1.5);
-        roundRect(44, tblY, W - 88, 36, 14, '#0f172a');
+        roundRect(44, tblY, W - 88, 40, 14, '#0f172a');
         ctx.fillStyle = '#ffffff';
-        ctx.font = '700 12.5px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+        ctx.font = '700 13px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
         ctx.fillText(
           `TABEL RINCIAN HARIAN W${activeWeekObj.weekNumber} — REPORT DP · BRAND · REPORT CV · TOTAL DP+CV`,
           60,
-          tblY + 23
+          tblY + 25
         );
 
         ctx.fillStyle = '#475569';
-        ctx.font = '700 10.5px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
-        ctx.fillText('HARI / TGL', 60, tblY + 56);
-        ctx.fillText('REPORT DP', 225, tblY + 56);
-        ctx.fillText('GRAPHIS (6201)', 380, tblY + 56);
-        ctx.fillText('SIMPLICITY (6244)', 535, tblY + 56);
-        ctx.fillText('REPORT CV', 705, tblY + 56);
-        ctx.fillText('TOTAL DP+CV', 865, tblY + 56);
-        ctx.fillText('TRX+NT', 1035, tblY + 56);
-        ctx.fillText('TRAFFIC', 1130, tblY + 56);
+        ctx.font = '700 11px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+        ctx.fillText('HARI / TGL', 62, tblY + 62);
+        ctx.fillText('REPORT DP', 216, tblY + 62);
+        ctx.fillText('GRAPHIS (6201)', 366, tblY + 62);
+        ctx.fillText('SIMPLICITY (6244)', 520, tblY + 62);
+        ctx.fillText('REPORT CV', 684, tblY + 62);
+        ctx.fillText('TOTAL DP+CV', 840, tblY + 62);
+        ctx.fillText('TRX+NT', 1002, tblY + 62);
+        ctx.fillText('TRAFFIC', 1090, tblY + 62);
         ctx.fillStyle = '#047857';
         ctx.font = '800 12px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
-        ctx.fillText('CONV %', 1245, tblY + 56);
+        ctx.fillText('CONV %', 1196, tblY + 62);
 
-        let ry = tblY + 66;
+        let ry = tblY + 74;
         activeWeekObj.days.forEach((d, i) => {
           const isSel = d.tanggal === activeDayObj.tanggal;
           roundRect(
             54,
             ry,
             W - 108,
-            26,
-            6,
+            44,
+            8,
             isSel ? '#ecfdf5' : i % 2 === 0 ? '#f8fafc' : '#ffffff',
-            isSel ? '#059669' : undefined,
-            isSel ? 1.5 : 0
+            isSel ? '#059669' : '#e2e8f0',
+            isSel ? 1.8 : 1
           );
           ctx.fillStyle = d.isWeekend ? '#be123c' : '#0f172a';
-          ctx.font = `${isSel ? '700' : '600'} 11px "JetBrains Mono", monospace`;
-          ctx.fillText(`${d.dayName.slice(0, 3)}, ${d.tanggal}`, 60, ry + 17);
+          ctx.font = `${isSel ? '700' : '600'} 11.5px "JetBrains Mono", monospace`;
+          ctx.fillText(`${d.dayName.slice(0, 3)}, ${d.tanggal}`, 62, ry + 27);
           ctx.fillStyle = '#312e81';
-          ctx.fillText(`Rp ${formatNumberId(d.dpSales) || '0'}`, 225, ry + 17);
+          ctx.fillText(`Rp ${formatNumberId(d.dpSales) || '0'}`, 216, ry + 27);
           ctx.fillStyle = '#6d28d9';
-          ctx.fillText(`Rp ${formatNumberId(d.graphisSales) || '0'}`, 380, ry + 17);
+          ctx.fillText(`Rp ${formatNumberId(d.graphisSales) || '0'}`, 366, ry + 27);
           ctx.fillStyle = '#0369a1';
-          ctx.fillText(`Rp ${formatNumberId(d.simplicitySales) || '0'}`, 535, ry + 17);
+          ctx.fillText(`Rp ${formatNumberId(d.simplicitySales) || '0'}`, 520, ry + 27);
           ctx.fillStyle = '#5b21b6';
-          ctx.fillText(`Rp ${formatNumberId(d.cvSales) || '0'}`, 705, ry + 17);
+          ctx.fillText(`Rp ${formatNumberId(d.cvSales) || '0'}`, 684, ry + 27);
           ctx.fillStyle = '#0f172a';
-          ctx.font = '700 11px "JetBrains Mono", monospace';
-          ctx.fillText(`Rp ${formatNumberId(d.grandSales) || '0'}`, 865, ry + 17);
+          ctx.font = '700 11.5px "JetBrains Mono", monospace';
+          ctx.fillText(`Rp ${formatNumberId(d.grandSales) || '0'}`, 840, ry + 27);
           ctx.fillStyle = '#047857';
-          ctx.fillText(`${d.totalTrxNota}`, 1035, ry + 17);
+          ctx.fillText(`${d.totalTrxNota}`, 1002, ry + 27);
           ctx.fillStyle = '#334155';
-          ctx.fillText(`${d.trafficTotal} org`, 1130, ry + 17);
+          ctx.fillText(`${d.trafficTotal} org`, 1090, ry + 27);
           ctx.fillStyle = '#047857';
-          ctx.font = '800 13.5px "JetBrains Mono", monospace';
+          ctx.font = '800 14px "JetBrains Mono", monospace';
           ctx.fillText(
             d.trafficTotal > 0
               ? `${((d.totalTrxNota / d.trafficTotal) * 100).toFixed(1)}%`
               : '-',
-            1245,
-            ry + 18
+            1196,
+            ry + 27
           );
-          ry += 28;
+          ry += 50;
         });
 
-        const noteTxt = [
-          activeDayObj.reasonPagi ? `Pagi: ${activeDayObj.reasonPagi}` : '',
-          activeDayObj.reasonSiang ? `Siang: ${activeDayObj.reasonSiang}` : '',
-          activeDayObj.cvReason ? `CV: ${activeDayObj.cvReason}` : '',
-        ]
-          .filter(Boolean)
-          .join(' · ');
-        ctx.fillStyle = '#64748b';
-        ctx.font = '600 11px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+        // Bottom 3-Column Operational Notes & Reason/Event Card
+        const notesY = 1530;
+        const notesH = 218;
+        roundRect(44, notesY, W - 88, notesH, 14, cardBg, cardBorder, 1.5);
+        roundRect(44, notesY, W - 88, 38, 14, '#0f172a');
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 12.5px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
         ctx.fillText(
-          clipText(ctx, `Catatan (${activeDayObj.tanggal}): ${noteTxt || '-'}`, W - 120),
+          `CATATAN OPERASIONAL & REASON / EVENT (${activeDayObj.dayName.toUpperCase()}, ${activeDayObj.tanggal})`,
           60,
-          tblY + tblH - 10
+          notesY + 24
         );
+
+        const wrapNoteLines = (text: string, maxW: number, maxLines: number): string[] => {
+          const clean = (text || '').trim() || '-';
+          const words = clean.split(/\s+/);
+          const lines: string[] = [];
+          let cur = '';
+          for (const word of words) {
+            const candidate = cur ? `${cur} ${word}` : word;
+            if (ctx.measureText(candidate).width <= maxW) {
+              cur = candidate;
+            } else {
+              if (cur) lines.push(cur);
+              cur = word;
+              if (lines.length >= maxLines) break;
+            }
+          }
+          if (cur && lines.length < maxLines) lines.push(cur);
+          if (lines.length === maxLines && words.join(' ').length > lines.join(' ').length) {
+            lines[maxLines - 1] = clipText(ctx, lines[maxLines - 1] + '...', maxW);
+          }
+          return lines;
+        };
+
+        const noteCols = [
+          {
+            title: `SHIFT PAGI (${activeDayObj.pagiStaff || '-'})`,
+            accent: '#b45309',
+            bg: '#fffbeb',
+            border: '#fde68a',
+            body: activeDayObj.reasonPagi || 'Belum ada catatan shift pagi.',
+          },
+          {
+            title: `SHIFT SIANG (${activeDayObj.siangStaff || '-'})`,
+            accent: '#4338ca',
+            bg: '#eef2ff',
+            border: '#c7d2fe',
+            body: activeDayObj.reasonSiang || 'Belum ada catatan shift siang.',
+          },
+          {
+            title: 'REPORT CV & PROMO DIV. 1',
+            accent: '#6d28d9',
+            bg: '#f5f3ff',
+            border: '#ddd6fe',
+            body:
+              activeDayObj.cvReason ||
+              `Graphis: ${brandOps.graphis.promo} · Simplicity: ${brandOps.simplicity.promo}`,
+          },
+        ];
+
+        const noteGap = 14;
+        const noteColW = (W - 116 - noteGap * 2) / 3;
+        noteCols.forEach((nc, idx) => {
+          const nx = 58 + idx * (noteColW + noteGap);
+          const ny = notesY + 50;
+          const nh = notesH - 64;
+          roundRect(nx, ny, noteColW, nh, 10, nc.bg, nc.border, 1.2);
+          ctx.fillStyle = nc.accent;
+          ctx.font = '800 11.5px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+          ctx.fillText(clipText(ctx, nc.title, noteColW - 24), nx + 12, ny + 22);
+
+          ctx.fillStyle = '#1e293b';
+          ctx.font = '600 12px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+          const wrapped = wrapNoteLines(nc.body, noteColW - 24, 5);
+          wrapped.forEach((line, lIdx) => {
+            ctx.fillText(line, nx + 12, ny + 46 + lIdx * 20);
+          });
+        });
       } else if (mode === 'weekly') {
         // =====================================================================
         // LAYOUT 2: WEEKLY 3:4 (1350 × 1800 px)
@@ -2297,7 +2362,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
   const getFileName = () => {
     const sSlug = stream === 'ALL' ? 'DP_CV' : stream;
     if (mode === 'harian') {
-      return `Screenshot_${sSlug}_Harian_${activeDayObj.tanggal.replace(/\//g, '-')}_1x1.png`;
+      return `Screenshot_${sSlug}_Harian_${activeDayObj.tanggal.replace(/\//g, '-')}_3x4.png`;
     }
     if (mode === 'weekly') {
       return `Screenshot_${sSlug}_Weekly_W${activeWeekObj.weekNumber}_${weeklyFocus}_3x4.png`;
@@ -2465,7 +2530,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
                   }`}
                 >
                   <Calendar className="w-3.5 h-3.5" />
-                  <span>Harian 1:1</span>
+                  <span>Harian 3:4</span>
                 </button>
                 <button
                   type="button"
