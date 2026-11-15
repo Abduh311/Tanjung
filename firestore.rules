@@ -1,0 +1,240 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Safety Net (Default-Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        (
+          request.auth.token.email == '4bduh.sept@gmail.com' ||
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        );
+    }
+
+    // Validation Blueprint: BazarWorkspace
+    function isValidBazarWorkspace(data, workspaceId) {
+      return data.keys().hasAll([
+          'workspaceId',
+          'weeklyTablesJson',
+          'reviewDocsJson',
+          'submissionLogsJson',
+          'updatedAtMs',
+          'updatedByRole'
+        ]) &&
+        data.keys().hasOnly([
+          'workspaceId',
+          'weeklyTablesJson',
+          'reviewDocsJson',
+          'submissionLogsJson',
+          'updatedAtMs',
+          'updatedByRole'
+        ]) &&
+        data.workspaceId is string &&
+        data.workspaceId.size() >= 1 &&
+        data.workspaceId.size() <= 64 &&
+        data.workspaceId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.workspaceId == workspaceId &&
+        data.weeklyTablesJson is string &&
+        data.weeklyTablesJson.size() >= 2 &&
+        data.weeklyTablesJson.size() <= 900000 &&
+        data.reviewDocsJson is string &&
+        data.reviewDocsJson.size() >= 2 &&
+        data.reviewDocsJson.size() <= 500000 &&
+        data.submissionLogsJson is string &&
+        data.submissionLogsJson.size() >= 2 &&
+        data.submissionLogsJson.size() <= 500000 &&
+        data.updatedAtMs is number &&
+        data.updatedAtMs >= 0 &&
+        data.updatedByRole is string &&
+        data.updatedByRole.size() >= 1 &&
+        data.updatedByRole.size() <= 32 &&
+        data.updatedByRole in ['admin', 'report_link', 'public_sync'];
+    }
+
+    // Validation Blueprint: CvWorkspace (/bazarWorkspaces/cv)
+    function isValidCvWorkspace(data, workspaceId) {
+      return data.keys().hasAll([
+          'workspaceId',
+          'cvDiv1RecordsJson',
+          'cvInventoryOpsJson',
+          'updatedAtMs',
+          'updatedByRole'
+        ]) &&
+        data.keys().hasOnly([
+          'workspaceId',
+          'cvDiv1RecordsJson',
+          'cvInventoryOpsJson',
+          'updatedAtMs',
+          'updatedByRole'
+        ]) &&
+        data.workspaceId is string &&
+        data.workspaceId.size() >= 1 &&
+        data.workspaceId.size() <= 64 &&
+        data.workspaceId.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.workspaceId == workspaceId &&
+        data.cvDiv1RecordsJson is string &&
+        data.cvDiv1RecordsJson.size() >= 2 &&
+        data.cvDiv1RecordsJson.size() <= 900000 &&
+        data.cvInventoryOpsJson is string &&
+        data.cvInventoryOpsJson.size() >= 2 &&
+        data.cvInventoryOpsJson.size() <= 500000 &&
+        data.updatedAtMs is number &&
+        data.updatedAtMs >= 0 &&
+        data.updatedByRole is string &&
+        data.updatedByRole.size() >= 1 &&
+        data.updatedByRole.size() <= 32 &&
+        data.updatedByRole in ['admin', 'report_link', 'public_sync'];
+    }
+
+    // Validation Blueprint: ReportSubmission
+    function isValidReportSubmission(data, submissionId) {
+      return data.keys().hasAll([
+          'id',
+          'timestamp',
+          'reportType',
+          'submittedBy',
+          'weekTitle',
+          'tanggal',
+          'shift',
+          'salesAmount',
+          'qtyAmount',
+          'trxAmount',
+          'summaryNote',
+          'createdAtMs'
+        ]) &&
+        data.keys().hasOnly([
+          'id',
+          'timestamp',
+          'reportType',
+          'submittedBy',
+          'weekTitle',
+          'tanggal',
+          'shift',
+          'salesAmount',
+          'qtyAmount',
+          'trxAmount',
+          'summaryNote',
+          'createdAtMs'
+        ]) &&
+        data.id is string &&
+        data.id.size() >= 1 &&
+        data.id.size() <= 128 &&
+        data.id.matches('^[a-zA-Z0-9_\\-]+$') &&
+        data.id == submissionId &&
+        data.timestamp is string &&
+        data.timestamp.size() >= 1 &&
+        data.timestamp.size() <= 64 &&
+        data.reportType is string &&
+        data.reportType.size() >= 1 &&
+        data.reportType.size() <= 32 &&
+        data.reportType in ['shift_sales', 'review_monitoring', 'cv_report', 'data_cv'] &&
+        data.submittedBy is string &&
+        data.submittedBy.size() >= 1 &&
+        data.submittedBy.size() <= 120 &&
+        data.weekTitle is string &&
+        data.weekTitle.size() >= 1 &&
+        data.weekTitle.size() <= 120 &&
+        data.tanggal is string &&
+        data.tanggal.size() >= 1 &&
+        data.tanggal.size() <= 32 &&
+        data.shift is string &&
+        data.shift.size() >= 1 &&
+        data.shift.size() <= 32 &&
+        data.salesAmount is number &&
+        data.salesAmount >= 0 &&
+        data.qtyAmount is number &&
+        data.qtyAmount >= 0 &&
+        data.trxAmount is number &&
+        data.trxAmount >= 0 &&
+        data.summaryNote is string &&
+        data.summaryNote.size() <= 2000 &&
+        data.createdAtMs is number &&
+        data.createdAtMs >= 0;
+    }
+
+    // Connection test document for validateConnection()
+    match /test/{docId} {
+      allow get: if isValidId(docId);
+      allow list, create, update, delete: if false;
+    }
+
+    // Main Bazar Workspace state (main = DP/Review/Logs, cv = Report CV & Data CV Ops)
+    match /bazarWorkspaces/{workspaceId} {
+      allow get: if isValidId(workspaceId) && (workspaceId == 'main' || workspaceId == 'cv');
+      allow list: if false;
+      allow create: if isValidId(workspaceId) && (
+        (workspaceId == 'main' && isValidBazarWorkspace(incoming(), workspaceId)) ||
+        (workspaceId == 'cv' && isValidCvWorkspace(incoming(), workspaceId))
+      );
+      allow update: if isValidId(workspaceId) && incoming().workspaceId == existing().workspaceId && (
+        (
+          workspaceId == 'main' &&
+          isValidBazarWorkspace(incoming(), workspaceId) &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'weeklyTablesJson',
+            'reviewDocsJson',
+            'submissionLogsJson',
+            'updatedAtMs',
+            'updatedByRole'
+          ])
+        ) ||
+        (
+          workspaceId == 'cv' &&
+          isValidCvWorkspace(incoming(), workspaceId) &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'cvDiv1RecordsJson',
+            'cvInventoryOpsJson',
+            'updatedAtMs',
+            'updatedByRole'
+          ])
+        )
+      );
+      allow delete: if isValidId(workspaceId) && isAdmin();
+    }
+
+    // Individual Report Submissions from Public Report Link
+    match /reportSubmissions/{submissionId} {
+      allow get: if isValidId(submissionId);
+      allow list: if resource.data.reportType in ['shift_sales', 'review_monitoring', 'cv_report', 'data_cv'];
+      allow create: if isValidId(submissionId) &&
+        isValidReportSubmission(incoming(), submissionId);
+      allow update: if isValidId(submissionId) &&
+        isValidReportSubmission(incoming(), submissionId) &&
+        incoming().id == existing().id &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'timestamp',
+          'submittedBy',
+          'weekTitle',
+          'tanggal',
+          'shift',
+          'salesAmount',
+          'qtyAmount',
+          'trxAmount',
+          'summaryNote',
+          'createdAtMs'
+        ]);
+      allow delete: if isValidId(submissionId) && isAdmin();
+    }
+  }
+}

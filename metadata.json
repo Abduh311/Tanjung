@@ -1,0 +1,8 @@
+{
+  "name": "Tanjung Monitoring Outmall",
+  "description": "Aplikasi rekapitulasi penjualan harian per shift (Weekly Sales Matrix) dan laporan Review Monitoring Bazar Tanjung lengkap dengan kalkulasi otomatis Price Point \u0026 Big Size serta ekspor WPS/Excel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

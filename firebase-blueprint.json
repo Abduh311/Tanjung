@@ -1,0 +1,200 @@
+{
+  "entities": {
+    "BazarWorkspace": {
+      "title": "BazarWorkspace",
+      "description": "Main synchronized state for Report Bazar Matahari Tanjung including weekly sales tables, review monitoring docs, and submission logs.",
+      "type": "object",
+      "properties": {
+        "workspaceId": {
+          "type": "string",
+          "description": "Identifier of the workspace document (e.g. main).",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "weeklyTablesJson": {
+          "type": "string",
+          "description": "Serialized weekly sales tables array.",
+          "minLength": 2,
+          "maxLength": 900000
+        },
+        "reviewDocsJson": {
+          "type": "string",
+          "description": "Serialized review monitoring documents array.",
+          "minLength": 2,
+          "maxLength": 500000
+        },
+        "submissionLogsJson": {
+          "type": "string",
+          "description": "Serialized report submission logs array.",
+          "minLength": 2,
+          "maxLength": 500000
+        },
+        "updatedAtMs": {
+          "type": "number",
+          "description": "Epoch timestamp in milliseconds of the last update."
+        },
+        "updatedByRole": {
+          "type": "string",
+          "description": "Role or source that triggered the update.",
+          "enum": ["admin", "report_link", "public_sync"],
+          "minLength": 1,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "workspaceId",
+        "weeklyTablesJson",
+        "reviewDocsJson",
+        "submissionLogsJson",
+        "updatedAtMs",
+        "updatedByRole"
+      ]
+    },
+    "CvWorkspace": {
+      "title": "CvWorkspace",
+      "description": "Synchronized state for Report CV Divisi 1 (Graphis & Simplicity) daily sales and Data CV Inventory Ops entries.",
+      "type": "object",
+      "properties": {
+        "workspaceId": {
+          "type": "string",
+          "description": "Identifier of the CV workspace document (cv).",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "cvDiv1RecordsJson": {
+          "type": "string",
+          "description": "Serialized Report CV Divisi 1 daily records array.",
+          "minLength": 2,
+          "maxLength": 900000
+        },
+        "cvInventoryOpsJson": {
+          "type": "string",
+          "description": "Serialized Data CV Inventory, Promo, Reason, and Action Plan array.",
+          "minLength": 2,
+          "maxLength": 500000
+        },
+        "updatedAtMs": {
+          "type": "number",
+          "description": "Epoch timestamp in milliseconds of the last update."
+        },
+        "updatedByRole": {
+          "type": "string",
+          "description": "Role or source that triggered the update.",
+          "enum": ["admin", "report_link", "public_sync"],
+          "minLength": 1,
+          "maxLength": 32
+        }
+      },
+      "required": [
+        "workspaceId",
+        "cvDiv1RecordsJson",
+        "cvInventoryOpsJson",
+        "updatedAtMs",
+        "updatedByRole"
+      ]
+    },
+    "ReportSubmission": {
+      "title": "ReportSubmission",
+      "description": "Individual shift sales or review monitoring report submitted via public report link.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique submission log ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Formatted Indonesian date and time string.",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "reportType": {
+          "type": "string",
+          "description": "Type of report submitted.",
+          "enum": ["shift_sales", "review_monitoring", "cv_report", "data_cv"],
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "submittedBy": {
+          "type": "string",
+          "description": "Name of staff member who submitted the report.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "weekTitle": {
+          "type": "string",
+          "description": "Target weekly title.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "tanggal": {
+          "type": "string",
+          "description": "Target date in DD/MM/YYYY format.",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "shift": {
+          "type": "string",
+          "description": "Target shift (Pagi, Siang, Pagi & Siang, or Review Bazar).",
+          "minLength": 1,
+          "maxLength": 32
+        },
+        "salesAmount": {
+          "type": "number",
+          "description": "Total sales amount in Rupiah."
+        },
+        "qtyAmount": {
+          "type": "number",
+          "description": "Total quantity sold in pcs."
+        },
+        "trxAmount": {
+          "type": "number",
+          "description": "Total number of transactions."
+        },
+        "summaryNote": {
+          "type": "string",
+          "description": "Reason, event, or review summary note.",
+          "minLength": 0,
+          "maxLength": 2000
+        },
+        "createdAtMs": {
+          "type": "number",
+          "description": "Epoch timestamp in milliseconds when submitted."
+        }
+      },
+      "required": [
+        "id",
+        "timestamp",
+        "reportType",
+        "submittedBy",
+        "weekTitle",
+        "tanggal",
+        "shift",
+        "salesAmount",
+        "qtyAmount",
+        "trxAmount",
+        "summaryNote",
+        "createdAtMs"
+      ]
+    }
+  },
+  "firestore": {
+    "/bazarWorkspaces/{workspaceId}": {
+      "schema": {
+        "$ref": "#/entities/BazarWorkspace"
+      },
+      "description": "Stores the live synchronized bazar workspace state (main for DP & Reviews, cv for Report CV & Data CV Ops)."
+    },
+    "/reportSubmissions/{submissionId}": {
+      "schema": {
+        "$ref": "#/entities/ReportSubmission"
+      },
+      "description": "Stores individual shift and review report submissions from public report links."
+    }
+  }
+}
