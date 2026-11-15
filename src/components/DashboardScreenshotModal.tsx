@@ -560,7 +560,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
     };
   }, [cvInventoryOps, cvLiveQtyMap, mode, monthKey, weekNumber]);
 
-  const isPortrait3x4 = true;
+  const ratioBadge = '3:4 PORTRAIT HD';
 
   const projectStream = (src: {
     dpSales: number;
@@ -647,8 +647,8 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
     if (!ctx) return;
 
     try {
-      const W = isPortrait3x4 ? 1350 : 1400;
-      const H = isPortrait3x4 ? 1800 : 1400;
+      const W = 1350;
+      const H = 1800;
       canvas.width = W;
       canvas.height = H;
 
@@ -703,7 +703,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       const hdrX = 44;
       const hdrY = 26;
       const hdrW = W - 88;
-      const hdrH = isPortrait3x4 ? 142 : 150;
+      const hdrH = 142;
       const hdrFill =
         stream === 'CV'
           ? '#4c1d95'
@@ -726,7 +726,6 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
           : stream === 'DP'
             ? 'REPORT DP'
             : 'REPORT CV DIV. 1';
-      const ratioBadge = isPortrait3x4 ? '3:4 PORTRAIT HD' : '1:1 SQUARE HD';
       const rightTag = `${streamBadge} · ${ratioBadge}`;
       ctx.font = 'bold 12.5px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
       const tagW = ctx.measureText(rightTag).width + 28;
@@ -746,9 +745,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       ctx.textAlign = 'left';
 
       ctx.fillStyle = '#ffffff';
-      ctx.font = isPortrait3x4
-        ? '800 30px "Plus Jakarta Sans", Inter, system-ui, sans-serif'
-        : '800 32px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
+      ctx.font = '800 30px "Plus Jakarta Sans", Inter, system-ui, sans-serif';
       const mainTitle =
         mode === 'harian'
           ? `DASHBOARD HARIAN — ${activeDayObj.dayName.toUpperCase()}, ${activeDayObj.tanggal}`
@@ -762,7 +759,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       ctx.fillText(
         clipText(ctx, mainTitle, hdrW - 52),
         hdrX + 26,
-        hdrY + (isPortrait3x4 ? 82 : 88)
+        hdrY + 82
       );
 
       ctx.fillStyle = '#cbd5e1';
@@ -776,7 +773,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
       ctx.fillText(
         clipText(ctx, subTitle, hdrW - 52),
         hdrX + 26,
-        hdrY + (isPortrait3x4 ? 116 : 122)
+        hdrY + 116
       );
 
       // Shared 4-Card KPI Strip
@@ -2338,7 +2335,6 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
     stream,
     monthlyFocus,
     weeklyFocus,
-    isPortrait3x4,
     theme,
     weekNumber,
     dayTanggal,
@@ -2470,8 +2466,7 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
             </div>
             <div>
               <h3 className="text-sm font-bold">
-                Studio Screenshot Semua Dashboard —{' '}
-                {isPortrait3x4 ? 'Rasio 3:4 (1350 × 1800 px)' : 'Rasio 1:1 (1400 × 1400 px)'}
+                Studio Screenshot Semua Dashboard — Rasio 3:4 (1350 × 1800 px)
               </h3>
               <p className="text-[11px] text-slate-300">
                 Mencakup DP + CV, Report DP, Report CV, Traffic &amp; Conv Rate, serta Data Brand Graphis (6201) &amp; Simplicity (6244)
@@ -2754,17 +2749,13 @@ export const DashboardScreenshotModal: React.FC<DashboardScreenshotModalProps> =
         </div>
 
         {/* Live Canvas Preview */}
-        <div className="p-4 sm:p-6 bg-slate-900/95 flex flex-col items-center justify-center max-h-[82vh] overflow-auto">
+        <div className="p-4 sm:p-6 bg-slate-900/95 flex flex-col items-center max-h-[82vh] overflow-auto">
           <div
-            className={`w-full transition-all duration-200 ${
+            className={`w-full mx-auto transition-all duration-200 ${
               zoomLevel === 'full'
-                ? isPortrait3x4
-                  ? 'min-w-[900px] aspect-[3/4]'
-                  : 'min-w-[900px] aspect-square'
-                : isPortrait3x4
-                  ? 'max-w-[540px] aspect-[3/4]'
-                  : 'max-w-[640px] aspect-square'
-            } rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-slate-950 flex items-center justify-center`}
+                ? 'min-w-[900px] aspect-[3/4]'
+                : 'max-w-[540px] aspect-[3/4]'
+            } rounded-xl overflow-hidden shadow-2xl border border-white/20 bg-slate-950 flex items-center justify-center shrink-0`}
           >
             <canvas ref={canvasRef} className="w-full h-full object-contain block" />
           </div>
